@@ -21,6 +21,11 @@ function BACKTRACK(assignment, csp) returns a solution or failure
 
 class Constraint:
 
+    _expandedList: list
+
+
+
+
     def __init__(self):
         self._expandedList = None #full list, including repeats, of all movements in cycle
         self._cycleLength = None #how many sessions for each training cycle excluding rest days eg ppl is 6 days
@@ -34,16 +39,18 @@ class Constraint:
         return self._expandedList
 
     @expand.setter
-    def expand(self, tuple):
-        expandedList = []
-        exercise, frequency = tuple
-        expansion = [exercise]* frequency
-        self._expandedList = self._expandedList.extend(expansion)
+    def expand(self, movementTupleList):
+        l = []
+        for movement, frequency in movementTupleList:
+            l.extend([movement] * frequency)
+        self._expandedList = l
+        
+    
 
 
 import movements as m
 
 csp = Constraint()
-csp.expand((m.benchPress, 3))
+csp.expand = [(m.abWheel, 2), (m.benchPress, 4), (m.chestFly, 1)]
 
-print(csp.expand())
+print(csp.expand)
