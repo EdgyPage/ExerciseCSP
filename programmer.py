@@ -19,3 +19,8 @@ function BACKTRACK(assignment, csp) returns a solution or failure
     return failure
 """
 
+class constraints:
+    
+
+import movements as m
+print(m.sdl.getAttributes())
