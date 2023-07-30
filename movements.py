@@ -98,6 +98,5 @@ movements = [
     createTempMovementDict('lateral raise', ['side delts'], 'isolation')
             ]
 
-movementsList = [createMovementFromDict(tempMovementDict) for tempMovementDict in movements]
+movementsDict = {createMovementFromDict(tempMovementDict).name : createMovementFromDict(tempMovementDict) for tempMovementDict in movements}
 
-movementsDict = {movement.name: movement for movement in movementsList}

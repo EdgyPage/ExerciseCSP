@@ -48,9 +48,11 @@ class Constraint:
     
 
 
-import movements as m
+from movements import movementsDict as m
 
 csp = Constraint()
-csp.expand = [(m.abWheel, 2), (m.benchPress, 4), (m.chestFly, 1)]
+print(m['bench press'].getAttributes())
+
+csp.expand = [(m['ab wheel'], 2), (m['bench press'], 4), (m['reverse fly'], 1)]
 
 print(csp.expand)
