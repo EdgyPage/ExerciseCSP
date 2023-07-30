@@ -71,48 +71,33 @@ class Movement:
         #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
         return allAttributes
 
-# defining movements
-benchPress = Movement()
-benchPress.setAttributes(name = "bench Press", part = ['front Delts', 'pecs', 'triceps'], style = 'compound')
+#can use this later to maybe create list of 
+def createMovementFromDict(movementDict : dict):
+    movement = Movement()
+    movement.setAttributes(name = movementDict["name"], part = movementDict["part"], style = movementDict["style"])
+    return movement
 
-shrug = Movement()
-shrug.setAttributes(name = "shrug", part = ['traps'], style = 'isolation')
+def createTempMovementDict(name: str, part: list, style: str):
+    return {'name': name, 'part': part, 'style': style}
 
-reverseFly = Movement()
-reverseFly.setAttributes(name = 'reverse flies', part = ['rear delts'], style = 'isolation')
+movements = [
+    createTempMovementDict('bench press', ['Front Delts', 'Pecs', 'Triceps'], 'compound'),
+    createTempMovementDict('shrug', ['traps'], 'isolation'),
+    createTempMovementDict('reverse fly', ['rear delts'], 'isolation'),
+    createTempMovementDict('ab wheel', ['abs'], 'isolation'),
+    createTempMovementDict('stiff leg dealift', ['hamstrings', 'lower back', 'glutes'], 'compound'),
+    createTempMovementDict('skullcrusher', ['triceps'], 'isolation'),
+    createTempMovementDict('overhead press', ['triceps', 'front delts', 'side delts'], 'compound'),
+    createTempMovementDict('leg press', ['quads'], 'isolation'),
+    createTempMovementDict('lat row', ['lats', 'biceps', 'rear delts'], 'compound'),
+    createTempMovementDict('reverse hyper', ['lower back', 'hamstrings'], 'isolation'),
+    createTempMovementDict('bicep curl', ['biceps'], 'isolation'),
+    createTempMovementDict('squat', ['quads', 'lower back'], 'compound'),
+    createTempMovementDict('glute ham raise', ['glutes', 'hamstrings'], 'isolation'),
+    createTempMovementDict('chest fly', ['pecs', 'front delts'], 'isolation'),
+    createTempMovementDict('lateral raise', ['side delts'], 'isolation')
+            ]
 
-abWheel = Movement()
-abWheel.setAttributes(name = 'ab wheel', part = ['abs'], style = 'isolation')
+movementsList = [createMovementFromDict(tempMovementDict) for tempMovementDict in movements]
 
-sdl = Movement()
-sdl.setAttributes(name = 'stiff leg dealift', part = ['hamstrings', 'lower back', 'glutes'], style = 'compound')
-
-skullcrusher = Movement()
-skullcrusher.setAttributes(name = 'skulllcrusher', part = ['triceps'], style = 'isolation')
-
-overheadPress = Movement()
-overheadPress.setAttributes(name = 'overhead press', part = ['triceps', 'front delts', 'side delts'], style = 'compound')
-
-legPress = Movement()
-legPress.setAttributes(name = 'leg press', part = ['quads'], style = 'isolation')
-
-latRow = Movement()
-latRow.setAttributes(name = 'lat row', part = ['lats', 'biceps', 'rear delts'], style = 'compound')
-
-reverseHyper = Movement()
-reverseHyper.setAttributes(name = 'reverse hyper', part = ['lower back', 'hamstrings'], style = 'isolation')
-
-bicepCurl = Movement()
-bicepCurl.setAttributes(name = 'bicep curl', part = ['biceps'], style = 'isolation')
-
-squat = Movement()
-squat.setAttributes(name = 'squat', part = ['quads', 'lower back'], style = 'compound')
-
-gluteHamRaise = Movement()
-gluteHamRaise.setAttributes(name = 'glute hame raise', part = ['glutes', 'hamstrings'], style = 'isolation')
-
-chestFly = Movement()
-chestFly.setAttributes(name = 'chest fly', part = ['pecs', 'front delts'], style = 'isolation')
-
-lateralRaise = Movement()
-lateralRaise.setAttributes(name = 'lateral raise', part = ['side delts'], style = 'isolation')
+movementsDict = {movement.name: movement for movement in movementsList}
