@@ -1,5 +1,5 @@
 from constraints import Constraint
-
+from movements import Movement
 class Assignment:
 
     def __init__(self, csp: Constraint):
@@ -15,6 +15,32 @@ class Assignment:
         self._progressSchedule = {}
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
-        
-    def test():
-        pass
+
+    @property
+    def progressList(self):
+        return self._progressList
+    
+    @progressList.setter
+    def progressList(self, movement: Movement, condition = True):
+        if condition:
+            self._progressList = self.progressList.append(movement)
+        else:
+            self._progressList.pop()
+    
+    @property
+    def progressSchedule(self):
+        return self._progressSchedule
+    
+    @progressSchedule.setter
+    def progressSchedule(self, day : int, movement: Movement, condition = True):
+        if condition:
+            self._progressSchedule[day] = self._progressSchedule[day].append(movement)
+        else:
+            self._progressSchedule[day].pop()
+
+    @property
+    def expandedList(self):
+        return self._expandedList
+
+    def sanityCheck(self):
+        len()
