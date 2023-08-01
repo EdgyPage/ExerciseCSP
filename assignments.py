@@ -1,7 +1,6 @@
 from constraints import Constraint
 from movements import Movement
 class Assignment:
-
     def __init__(self, csp: Constraint):
         #test conditions copied from from Constraints
         self._expandedList = csp.expandedList #full list, including repeats, of all movements in cycle
@@ -11,10 +10,14 @@ class Assignment:
         self._totalLimit = csp.totalLimit #how many movements per day maximum
         self._compoundGap = csp.compoundGap #how many days of gap between similar compound movements
 
-        self._progressList = []
-        self._progressSchedule = {}
+        self._progressList = [] #built up list of assigned movements, used for comparisons
+        self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
+
+    @property
+    def expandedList(self):
+        return self._expandedList
 
     @property
     def progressList(self):
@@ -42,5 +45,77 @@ class Assignment:
     def expandedList(self):
         return self._expandedList
 
-    def sanityCheck(self):
-        len()
+    @property
+    def cycleLength(self):
+        return self._cycleLength
+
+    @property
+    def compoundLimit(self):
+        return self._compoundLimit
+    
+    @property
+    def isolationLimit(self):
+        return self._isolationLimit
+    
+    @property
+    def totalLimit(self):
+        return self._totalLimit
+    
+    @property
+    def compoundGap(self):
+        return self._compoundGap
+    
+    def progressScheduleSplitter(self):
+        compoundDict = {}
+        isolationDict = {}
+        for i in range(0, self._cycleLength):
+            compoundDict[i+1] = []
+            isolationDict[i+1] = []
+
+        for day, movements in self.progressSchedule.items():
+            for movement in movements:
+                if movement.style == 'compound':
+                    compoundDict[day] = compoundDict[day].append(movement)
+                elif movement.style == 'isolation':
+                    isolationDict[day] = isolationDict[day].append(movement)
+        return compoundDict, isolationDict
+
+    def meetSpace(self):
+        max = self.cycleLength * self.totalLimit
+        return max >= len(self.expandedList)
+    
+    def meetCompoundIsolationLimit(self):
+        compoundDict, isolationDict = self.progressScheduleSplitter()
+        flag = True
+        for day, movements in compoundDict.items():
+            if len(movements) > self.compoundLimit:
+                flag = False
+        for day, movements in isolationDict.items():
+            if len(movements) > self.isolationLimit:
+                flag = False
+        return flag
+
+    def meetTotalLimit(self):
+        flag = True
+        copyProgress = self.progressSchedule
+        for day, movements in copyProgress.items():
+            if len(movements) > self.totalLimit:
+                flag = False
+        return True
+    
+    def meetNoCompoundIsolationDailyOverlap(self):
+        compoundDict, *_ = self.progressScheduleSplitter()
+        tempDict = {}
+        flag = True
+        for i in range(0, self._cycleLength):
+            tempDict[i+1] = []
+
+        for day, movements in compoundDict.items():
+            for movement in movements:
+                tempDict[day] = tempDict[day].append(movement.part)
+        
+        for i in range(0, self.cycleLength):
+            if len(tempDict[i]) != len(set(tempDict[i])):
+                flag = False
+        
+        return flag

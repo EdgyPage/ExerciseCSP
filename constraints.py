@@ -1,3 +1,4 @@
+from movements import Movement
 class Constraint:
 
     _expandedList: list
