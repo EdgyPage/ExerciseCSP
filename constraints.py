@@ -10,6 +10,7 @@ class Constraint:
         self._compoundLimit = None #how many compound movements per session
         self._isolationLimit = None #how many isolation movements per session
         self._totalLimit = None #how many movements per day maximum
+        self._totalMin = None #how many movements per day minimum
         self._compoundGap = None #how many days of gap between similar compound movements
 
         #below attributes may be implemented in the future as current implentation would require fiddling with compoundGap logic
@@ -73,6 +74,16 @@ class Constraint:
         if not isinstance(limit, int) or limit < 1:
             raise ValueError(f'Expected integer for totalLimit greater than 0, got {type(limit)}: {limit}')
         self._totalLimit = limit
+
+    @property
+    def totalMin(self):
+        return self._totalMin
+    
+    @totalMin.setter
+    def totalMin(self, limit: int):
+        if not isinstance(limit, int) or limit > self.totalLimit:
+            raise ValueError(f'Expected integer for totalMin less than totalLimit, got {type(limit)}: {limit}')
+        self._totalMin = limit
     
     @property
     def compoundGap(self):

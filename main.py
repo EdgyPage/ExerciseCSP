@@ -21,15 +21,22 @@ function BACKTRACK(assignment, csp) returns a solution or failure
 from constraints import *
 from movements import *
 from movements import movementsDict as m
+from assignments import *
 
 csp = Constraint()
 csp.setAttributes(expandedList = [(m['ab wheel'], 2), 
-                                  (m['bench press'], 4), 
+                                  (m['bench press'], 3), 
                                   (m['reverse fly'], 1)
                                   ],
                     cycleLength = 5,
                     compoundLimit = 3,
                     isolationLimit = 4,
-                    totalLimit = 4,
+                    totalLimit = 2,
+                    totalMin = 2,
                     compoundGap = 1
 )
+
+answers = []
+
+assign = Assignment(csp)
+

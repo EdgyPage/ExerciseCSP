@@ -8,6 +8,7 @@ class Assignment:
         self._compoundLimit = csp.compoundLimit #how many compound movements per session
         self._isolationLimit = csp.isolationLimit #how many isolation movements per session
         self._totalLimit = csp.totalLimit #how many movements per day maximum
+        self._totalMin = csp.totalMin #how many movements per day minimum
         self._compoundGap = csp.compoundGap #how many days of gap between similar compound movements
 
         self._progressList = [] #built up list of assigned movements, used for comparisons
@@ -65,6 +66,10 @@ class Assignment:
     def compoundGap(self):
         return self._compoundGap
     
+    @property
+    def totalMin(self):
+        return self.totalMin
+    
     def progressScheduleSplitter(self):
         compoundDict = {}
         isolationDict = {}
@@ -101,6 +106,15 @@ class Assignment:
         copyProgress = self.progressSchedule
         for key in copyProgress:
             if len(copyProgress[key]) > self.totalLimit:
+                flag = False
+                break
+        return flag
+    
+    def meetMinLimit(self):
+        flag = True
+        copyProgress = self.progressSchedule
+        for key in copyProgress:
+            if len(copyProgress[key]) < self.totalMin:
                 flag = False
                 break
         return flag
@@ -148,8 +162,12 @@ class Assignment:
         return flag
     
     def testSuite(self):
-        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit
+        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit and self.meetMinLimit
         return flag
+    
+    def findAssignment(self, answers :list):
+        pass
+
 
 
         
