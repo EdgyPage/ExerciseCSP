@@ -93,29 +93,67 @@ class Assignment:
         for day, movements in isolationDict.items():
             if len(movements) > self.isolationLimit:
                 flag = False
+                break
         return flag
 
     def meetTotalLimit(self):
         flag = True
         copyProgress = self.progressSchedule
-        for day, movements in copyProgress.items():
-            if len(movements) > self.totalLimit:
+        for key in copyProgress:
+            if len(copyProgress[key]) > self.totalLimit:
                 flag = False
-        return True
+                break
+        return flag
     
     def meetNoCompoundIsolationDailyOverlap(self):
-        compoundDict, *_ = self.progressScheduleSplitter()
+        compoundDict, isolationDict = self.progressScheduleSplitter()
         tempDict = {}
         flag = True
-        for i in range(0, self._cycleLength):
+        for i in range(0, self.cycleLength):
             tempDict[i+1] = []
 
         for day, movements in compoundDict.items():
             for movement in movements:
                 tempDict[day] = tempDict[day].append(movement.part)
         
-        for i in range(0, self.cycleLength):
-            if len(tempDict[i]) != len(set(tempDict[i])):
-                flag = False
+        for day, movement in isolationDict.items():
+            for movement in movements:
+                tempDict[day] = tempDict[day].append(movement.part)
         
+        for key in tempDict:
+            if len(tempDict[key]) != len(set(tempDict[key])):
+                flag = False
+                break
         return flag
+    
+    def meetCompoundGap(self):
+        compoundDict, *_ = self.progressScheduleSplitter()
+        tempDict = {}
+        flag = True
+
+        for day, movement in compoundDict.items():
+            if tempDict[movement.name] is None:
+                tempDict[movement.name] = [day]
+            else:
+                tempDict[movement.name] = sorted(tempDict[movement.name].append(day))
+        
+        for name, days in tempDict:
+            prevDay = None
+            for currentDay in days:
+                if prevDay is not None:
+                    if currentDay - prevDay <= self.compoundGap:
+                        flag = False
+                        break
+                prevDay = currentDay
+        return flag
+    
+    def testSuite(self):
+        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit
+        return flag
+
+
+        
+
+
+
+
