@@ -88,9 +88,9 @@ class Assignment:
         for day, movements in self.progressSchedule.items():
             for movement in movements:
                 if movement.style == 'compound':
-                    compoundDict[day] = compoundDict[day].append(movement)
+                    compoundDict[day].append(movement)
                 elif movement.style == 'isolation':
-                    isolationDict[day] = isolationDict[day].append(movement)
+                    isolationDict[day].append(movement)
         return compoundDict, isolationDict
 
     def meetMovements(self):
@@ -124,7 +124,7 @@ class Assignment:
     def assignedDays(self):
         assignedDays = 0
         unassignedDays = 0
-        for key, value in self.progressSchedule:
+        for key, value in self.progressSchedule.items():
             if value:
                 assignedDays += 1
             else:
@@ -156,11 +156,11 @@ class Assignment:
 
         for day, movements in compoundDict.items():
             for movement in movements:
-                tempDict[day] = tempDict[day].append(movement.part)
+                tempDict[day].extend(movement.part)
         
         for day, movement in isolationDict.items():
             for movement in movements:
-                tempDict[day] = tempDict[day].append(movement.part)
+                tempDict[day].extend(movement.part)
         
         for key in tempDict:
             if len(tempDict[key]) != len(set(tempDict[key])):
@@ -173,13 +173,15 @@ class Assignment:
         tempDict = {}
         flag = True
 
-        for day, movement in compoundDict.items():
-            if tempDict[movement.name] is None:
-                tempDict[movement.name] = [day]
-            else:
-                tempDict[movement.name] = sorted(tempDict[movement.name].append(day))
+        for day, movements in compoundDict.items():
+            if movements:
+                for movement in movements:  
+                    if movement.name in tempDict:
+                        tempDict[movement.name].append(day)
+                    else:
+                        tempDict[movement.name] = [day]
         
-        for name, days in tempDict:
+        for name, days in tempDict.items():
             prevDay = None
             for currentDay in days:
                 if prevDay is not None:
@@ -190,16 +192,16 @@ class Assignment:
         return flag
     
     def partialTestSuite(self):
-        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit \
-                and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit \
-                and self.meetMinLimitPartial
+        flag = self.meetCompoundGap() and self.meetCompoundIsolationLimit() \
+                and self.meetNoCompoundIsolationDailyOverlap() and self.meetTotalLimit() \
+                and self.meetMinLimitPartial()
         return flag
 
     def completeTestSuite(self):
-        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit \
-                and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit \
-                and self.meetMinLimitComplete and self.meetMovements \
-                and self.meetMinLimitPartial
+        flag = self.meetCompoundGap() and self.meetCompoundIsolationLimit() \
+                and self.meetNoCompoundIsolationDailyOverlap() and self.meetTotalLimit() \
+                and self.meetMinLimitComplete() and self.meetMovements() \
+                and self.meetMinLimitPartial()
         return flag
     
     def findAssignment(self, movements : list, answers :list):

@@ -26,10 +26,10 @@ import copy
 
 csp = Constraint()
 csp.setAttributes(expandedList = [(m['ab wheel'], 2), 
-                                  (m['bench press'], 3), 
+                                  (m['bench press'], 1), 
                                   (m['reverse fly'], 1)
                                   ],
-                    cycleLength = 5,
+                    cycleLength = 2,
                     compoundLimit = 3,
                     isolationLimit = 4,
                     totalLimit = 2,
