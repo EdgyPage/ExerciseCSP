@@ -1,5 +1,6 @@
 from constraints import Constraint
 from movements import Movement
+import copy
 class Assignment:
     def __init__(self, csp: Constraint):
         #test conditions copied from from Constraints
@@ -13,6 +14,7 @@ class Assignment:
 
         self._progressList = [] #built up list of assigned movements, used for comparisons
         self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments
+        self._maxPossibleDays = len(self.expandedList) // self.totalMin #highest amount of days a program can have
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
 
@@ -25,9 +27,10 @@ class Assignment:
         return self._progressList
     
     @progressList.setter
-    def progressList(self, movement: Movement, condition = True):
+    def progressList(self, value : (Movement, bool)):
+        movement, condition = value
         if condition:
-            self._progressList = self.progressList.append(movement)
+            self.progressList.append(movement)
         else:
             self._progressList.pop()
     
@@ -36,9 +39,10 @@ class Assignment:
         return self._progressSchedule
     
     @progressSchedule.setter
-    def progressSchedule(self, day : int, movement: Movement, condition = True):
+    def progressSchedule(self, value: (int, Movement, bool)):
+        day, movement, condition = value
         if condition:
-            self._progressSchedule[day] = self._progressSchedule[day].append(movement)
+            self._progressSchedule[day].append(movement)
         else:
             self._progressSchedule[day].pop()
 
@@ -68,7 +72,11 @@ class Assignment:
     
     @property
     def totalMin(self):
-        return self.totalMin
+        return self._totalMin
+    
+    @property
+    def maxPossibleDays(self):
+        return self._maxPossibleDays
     
     def progressScheduleSplitter(self):
         compoundDict = {}
@@ -84,6 +92,10 @@ class Assignment:
                 elif movement.style == 'isolation':
                     isolationDict[day] = isolationDict[day].append(movement)
         return compoundDict, isolationDict
+
+    def meetMovements(self):
+        flag = self.expandedList == self.progressList
+        return flag
 
     def meetSpace(self):
         max = self.cycleLength * self.totalLimit
@@ -103,18 +115,34 @@ class Assignment:
 
     def meetTotalLimit(self):
         flag = True
-        copyProgress = self.progressSchedule
-        for key in copyProgress:
-            if len(copyProgress[key]) > self.totalLimit:
+        for key in self.progressSchedule:
+            if len(self.progressSchedule[key]) > self.totalLimit:
                 flag = False
                 break
         return flag
     
-    def meetMinLimit(self):
+    def assignedDays(self):
+        assignedDays = 0
+        unassignedDays = 0
+        for key, value in self.progressSchedule:
+            if value:
+                assignedDays += 1
+            else:
+                unassignedDays += 1
+        return assignedDays, unassignedDays
+
+    def meetMinLimitPartial(self):
         flag = True
-        copyProgress = self.progressSchedule
-        for key in copyProgress:
-            if len(copyProgress[key]) < self.totalMin:
+        assignedDays, unassignedDays = self.assignedDays()
+        maxPossibleDays = self.maxPossibleDays
+        if assignedDays > maxPossibleDays:
+            flag = False
+        return flag
+
+    def meetMinLimitComplete(self):
+        flag = True
+        for key in self.progressSchedule:
+            if len(self.progressSchedule[key]) < self.totalMin:
                 flag = False
                 break
         return flag
@@ -161,12 +189,35 @@ class Assignment:
                 prevDay = currentDay
         return flag
     
-    def testSuite(self):
-        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit and self.meetMinLimit
+    def partialTestSuite(self):
+        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit \
+                and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit \
+                and self.meetMinLimitPartial
+        return flag
+
+    def completeTestSuite(self):
+        flag = self.meetCompoundGap and self.meetCompoundIsolationLimit \
+                and self.meetNoCompoundIsolationDailyOverlap and self.meetTotalLimit \
+                and self.meetMinLimitComplete and self.meetMovements \
+                and self.meetMinLimitPartial
         return flag
     
-    def findAssignment(self, answers :list):
-        pass
+    def findAssignment(self, movements : list, answers :list):
+        if movements:
+            for movement in movements:
+                for key in self.progressSchedule:
+                    updateAssignment = copy.deepcopy(self)
+                    updateMovements = movements[1:]
+                    updateAssignment.progressSchedule = (key, movement, True)
+                    updateAssignment.progressList = (movement, True)
+                    if updateAssignment.partialTestSuite():
+                        updateAssignment.findAssignment(updateMovements, answers)
+        else:
+            if self.completeTestSuite():
+                answers.append(self)
+        return answers
+                    
+
 
 
 

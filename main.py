@@ -22,6 +22,7 @@ from constraints import *
 from movements import *
 from movements import movementsDict as m
 from assignments import *
+import copy
 
 csp = Constraint()
 csp.setAttributes(expandedList = [(m['ab wheel'], 2), 
@@ -37,6 +38,8 @@ csp.setAttributes(expandedList = [(m['ab wheel'], 2),
 )
 
 answers = []
-
 assign = Assignment(csp)
 
+answers = assign.findAssignment(assign.expandedList, answers)
+
+print(answers)
