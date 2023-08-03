@@ -42,4 +42,5 @@ assign = Assignment(csp)
 
 assign.findAssignment(assign.expandedList, answers)
 
-print(answers)
+for answer in answers:
+    print(answer)

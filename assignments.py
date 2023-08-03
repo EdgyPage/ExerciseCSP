@@ -24,13 +24,36 @@ class Assignment:
             output += f'{key}: '
             if movements:
                 for movement in movements:
-                    output += f', {movement}'
+                    if movements.index(movement) == 0:
+                        output += f' {movement}'
+                    else:
+                        output += f', {movement}'
             output += '\n'
         return output
-
-
-
-            
+    
+    def __eq__(self, other):
+        flag = True
+        if not isinstance(other, Assignment):
+            flag = False
+            return flag
+        selfAttributes = self.getAttributes()
+        otherAttributes = other.getAttributes()
+        flag = selfAttributes == otherAttributes
+        return flag
+    
+    def __hash__(self):
+        hashable = tuple()
+        for key, movements in self.progressSchedule.items():
+            hashable = hashable + (key,)
+            for movement in movements:
+                hashable = hashable + (movement,)
+        return hash(hashable)
+        
+    def getAttributes(self):
+        allAttributes = vars(self)
+        #below line was part of previous implementation where class had no class attributes
+        #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
+        return allAttributes    
 
     @property
     def expandedList(self):
@@ -179,12 +202,12 @@ class Assignment:
             for movement in movements:
                 tempDict[day].extend(movement.part)
         
-        for day, movement in isolationDict.items():
+        for day, movements in isolationDict.items():
             for movement in movements:
                 tempDict[day].extend(movement.part)
         
         for key in tempDict:
-            if len(tempDict[key]) != len(set(tempDict[key])):
+            if len(tempDict[key]) != len(list(set(tempDict[key]))):
                 flag = False
                 break
         return flag
@@ -224,7 +247,7 @@ class Assignment:
                 and self.meetMinLimitComplete() and self.meetMovements() \
                 and self.meetMinLimitPartial()
         return flag
-    
+
     def findAssignment(self, movements : list, answers :list):
         if movements:
             for movement in movements:
@@ -238,7 +261,14 @@ class Assignment:
         else:
             if self.completeTestSuite():
                 answers.append(self)
-                    
+                removeDuplicates(answers)
+
+    
+def removeDuplicates(answers: list):
+    unique = set(answers)
+    answers.clear()
+    answers.extend(unique)
+
 
 
 

@@ -24,6 +24,23 @@ class Movement:
     
     def __repr__(self):
         return f'{self.name}'
+    
+    def __eq__(self, other):
+        flag = True
+        if not isinstance(other, Movement):
+            flag = False
+            return flag
+        selfAttributes = self.getAttributes()
+        otherAttributes = other.getAttributes()
+        flag = selfAttributes == otherAttributes
+        return flag
+    
+    def __hash__(self):
+        hashable = tuple()
+        hashable = hashable + (self.name, self.style)
+        for part in self.part:
+            hashable = hashable + (part,)
+        return hash(hashable)
 
     @property
     #returns name of Movement
