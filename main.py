@@ -40,6 +40,6 @@ csp.setAttributes(expandedList = [(m['ab wheel'], 2),
 answers = []
 assign = Assignment(csp)
 
-answers = assign.findAssignment(assign.expandedList, answers)
+assign.findAssignment(assign.expandedList, answers)
 
 print(answers)

@@ -21,6 +21,9 @@ class Movement:
         self._name = None
         self._style = None
         self._parts = None
+    
+    def __repr__(self):
+        return f'{self.name}'
 
     @property
     #returns name of Movement

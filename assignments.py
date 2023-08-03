@@ -17,6 +17,20 @@ class Assignment:
         self._maxPossibleDays = len(self.expandedList) // self.totalMin #highest amount of days a program can have
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
+    
+    def __repr__(self):
+        output = ''
+        for key, movements in self.progressSchedule.items():
+            output += f'{key}: '
+            if movements:
+                for movement in movements:
+                    output += f', {movement}'
+            output += '\n'
+        return output
+
+
+
+            
 
     @property
     def expandedList(self):
@@ -94,7 +108,14 @@ class Assignment:
         return compoundDict, isolationDict
 
     def meetMovements(self):
-        flag = self.expandedList == self.progressList
+        flag = True
+        if len(self.progressList) != len(self.expandedList):
+            flag = False
+            return flag
+        for m1, m2 in list(zip(self.progressList, self.expandedList)):
+            flag = m1.getAttributes() == m2.getAttributes()
+            if flag == False:
+                break
         return flag
 
     def meetSpace(self):
@@ -217,7 +238,6 @@ class Assignment:
         else:
             if self.completeTestSuite():
                 answers.append(self)
-        return answers
                     
 
 
