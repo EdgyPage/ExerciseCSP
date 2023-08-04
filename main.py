@@ -50,15 +50,37 @@ csp.setAttributes(expandedList = [(m['bench press'], 1),
                     compoundGap = 1,
                     isolationGap = 1,
                     compoundMin = 2,
-                    isolationMin = 1,
-                    fatigueLimit = 100,
-                    fatigueMin = 70
+                    isolationMin = 0,
+                    fatigueLimit = 75,
+                    fatigueMin = 35
 )
+
+"""csp = Constraint()
+csp.setAttributes(expandedList = [(m['bench press'], 3), 
+                                  (m['ab wheel'], 3)
+                                 
+                                  ],
+                    cycleLength = 5,
+                    compoundLimit = 3,
+                    isolationLimit = 3,
+                    totalLimit = 4,
+                    totalMin = 1,
+                    compoundGap = 1,
+                    isolationGap = 1,
+                    compoundMin = 0,
+                    isolationMin = 0,
+                    fatigueLimit = 75,
+                    fatigueMin = 10
+)"""
+
+
+
+
 count = 0
 answers = []
 assign = Assignment(csp)
 if assign.meetSpace():
-    assign.findAssignment(assign.expandedList, answers, count)
+    assign.findAssignment(assign.expandedList, answers)
     for answer in answers:
         print(answer)
     print(count)

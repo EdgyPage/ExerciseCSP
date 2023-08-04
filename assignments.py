@@ -19,11 +19,12 @@ class Assignment:
 
         self._progressList = [] #built up list of assigned movements, used for comparisons
         self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments
-        self._maxPossibleDays = len(self.expandedList) // self.totalMin #highest amount of days a program can have
-        self._maxPossibleCompoundDays = len([movement for movement in self.expandedList if movement.style == 'compound']) // self.compoundMin
-        self._maxPossibleIsolationDays = len([movement for movement in self.expandedList if movement.style == 'isolation']) // self.isolationMin
+        self._maxPossibleDays = self.maxPossibleTotalDaysCalc()
+        self._maxPossibleCompoundDays = self.maxPossibleCompoundDaysCalc()
+        self._maxPossibleIsolationDays = self.maxPossibleIsolationDaysCalc()
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
+
     
     def __repr__(self):
         output = ''
@@ -117,10 +118,6 @@ class Assignment:
     @property
     def totalMin(self):
         return self._totalMin
-    
-    @property
-    def maxPossibleDays(self):
-        return self._maxPossibleDays
 
     @property
     def isolationGap(self):
@@ -143,12 +140,37 @@ class Assignment:
         return self._fatigueMin
     
     @property
+    def maxPossibleDays(self):
+        return self._maxPossibleDays
+    
+    def maxPossibleTotalDaysCalc(self):
+        if self.totalMin == 0:
+            days = 0
+        else:
+            days = len(self.expandedList) // self.totalMin #highest amount of days a program can have
+        return days
+    
+    @property
     def maxPossibleCompoundDays(self):
         return self._maxPossibleCompoundDays
+    
+    def maxPossibleCompoundDaysCalc(self):
+        if self.compoundMin == 0:
+            days = 0
+        else:
+            days = len([movement for movement in self.expandedList if movement.style == 'compound']) // self.compoundMin
+        return days
     
     @property
     def maxPossibleIsolationDays(self):
         return self._maxPossibleIsolationDays
+    
+    def maxPossibleIsolationDaysCalc(self):
+        if self.isolationMin == 0:
+            days = 0
+        else:
+            days = len([movement for movement in self.expandedList if movement.style == 'isolation']) // self.isolationMin
+        return days
 
     def progressScheduleSplitter(self):
         compoundDict = {}
@@ -235,14 +257,20 @@ class Assignment:
         
         compoundMovementPerDayDict, isolationMovementPerDayDict = self.assignedCompoundIsolationDays()
         for key, count in compoundMovementPerDayDict.items():
-            if count > self.maxPossibleCompoundDays:
-                flag = False
-                return flag
+            if self.maxPossibleCompoundDays == 0:
+                pass
+            else:
+                if count > self.maxPossibleCompoundDays:
+                    flag = False
+                    return flag
         
         for key, count in isolationMovementPerDayDict.items():
-            if count > self.maxPossibleIsolationDays:
-                flag = False
-                return flag
+            if self.maxPossibleIsolationDays == 0:
+                pass
+            else:
+                if count > self.maxPossibleIsolationDays:
+                    flag = False
+                    return flag
 
         return flag
 
@@ -270,7 +298,7 @@ class Assignment:
     #thanks, chatGPT-chan
     def is_combination_above_threshold(self, numbers, threshold):
         def check_combination(index, current_sum):
-            if current_sum > threshold:
+            if current_sum >= threshold:
                 return True
             if index >= len(numbers):
                 return False
@@ -291,10 +319,11 @@ class Assignment:
         fatigueList = [movement.fatigue for movement in unassignedMovements]
         flag = True
         for key, movements in self.progressSchedule.items():
-            threshold = self.fatigueMin - sum([movement.fatigue for movement in movements]) 
-            flag = self.is_combination_above_threshold(fatigueList, threshold)
-            if not flag:
-                return flag
+            if movements:
+                threshold = self.fatigueMin - sum([movement.fatigue for movement in movements]) 
+                flag = self.is_combination_above_threshold(fatigueList, threshold)
+                if not flag:
+                    return flag
         return flag
 
     def meetFatigueLimitMinComplete(self):
@@ -330,6 +359,10 @@ class Assignment:
                 flag = False
                 break
         return flag
+    
+    def gapChecker(self, dictToCheck):
+        pass
+
     
     def meetCompoundIsolationGap(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
@@ -371,35 +404,78 @@ class Assignment:
                         return flag
                 prevDay = currentDay
         
-        #need mix of compound,isolation?... nah
+        return flag
+    
+    def meetCompoundIsolationGapOverlap(self):
+        compoundDict, isolationDict = self.progressScheduleSplitter()
+        tempDict = {}
+        flag = True
+
+        for day, movements in compoundDict.items():
+            if movements:
+                for movement in movements:
+                    for part in movement.part:  
+                        if part in tempDict:
+                            tempDict[part].append(day)
+                        else:
+                            tempDict[part] = [day]
+
+        for day, movements in isolationDict.items():
+            if movements:
+                for movement in movements:
+                    for part in movement.part:  
+                        if part in tempDict:
+                            tempDict[part].append(day)
+                        else:
+                            tempDict[part] = [day]
+
+        for part, days in tempDict.items():
+            prevDay = None
+            for currentDay in days:
+                if prevDay is not None:
+                    if currentDay - prevDay <= self.isolationGap:
+                        flag = False
+                        return flag
+                prevDay = currentDay
         
         return flag
     
     def partialTestSuite(self, unassignedMovements):
-        flag = self.meetCompoundIsolationGap() and self.meetCompoundIsolationLimit() \
-                and self.meetNoCompoundIsolationDailyOverlap() and self.meetTotalLimit() \
-                and self.meetTotalCompoundIsolationMinPartial() and self.meetFatigueLimitPartial() \
-                and self.meetFatigueMinPartial(unassignedMovements) and self.meetCompoundIsolationGap()
+        flag = self.meetCompoundIsolationGap() and \
+            self.meetCompoundIsolationLimit() \
+                and self.meetNoCompoundIsolationDailyOverlap() and \
+                    self.meetTotalLimit() \
+                and self.meetTotalCompoundIsolationMinPartial() and \
+                    self.meetFatigueLimitPartial() \
+                and self.meetFatigueMinPartial(unassignedMovements) and \
+                    self.meetCompoundIsolationGap() \
+                and self.meetCompoundIsolationGapOverlap()
         return flag
 
     def completeTestSuite(self, unassignedMovements):
-        flag = self.partialTestSuite(unassignedMovements) and self.meetMovements() \
-                and self.meetTotalMinComplete() and self.meetFatigueLimitMinComplete()
+        flag = self.partialTestSuite(unassignedMovements) \
+            and self.meetMovements() \
+                and self.meetTotalMinComplete() \
+                    and self.meetFatigueLimitMinComplete()
         return flag
 
-    def findAssignment(self, movements : list, answers :list, count: int):
+    def findAssignment(self, movements : list, answers :list):
+        flag = True
         if movements:
             for movement in movements:
-                count += 1
                 for key in self.progressSchedule:
                     updateAssignment = copy.deepcopy(self)
                     updateMovements = movements[1:]
                     updateAssignment.progressSchedule = (key, movement, True)
                     updateAssignment.progressList = (movement, True)
-                    if updateAssignment.partialTestSuite(updateMovements):
-                        updateAssignment.findAssignment(updateMovements, answers, count)
+                    passConditions = updateAssignment.partialTestSuite(updateMovements)
+                    if passConditions:
+                        updateAssignment.findAssignment(updateMovements, answers)
+                    if key == list(self.progressSchedule.keys())[-1] and not passConditions:
+                        flag = False
+                if not flag:
+                    break
         else:
-            count += 1
             if self.completeTestSuite([]):
                 answers.append(self)
                 removeDuplicates(answers)

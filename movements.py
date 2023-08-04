@@ -108,22 +108,22 @@ def createTempMovementDict(name: str, part: list, style: str, exhaust: int):
     return {'name': name, 'part': part, 'style': style, 'fatigue': exhaust}
 
 movements = [
-    createTempMovementDict('bench press', ['Front Delts', 'Pecs', 'Triceps'], 'compound', 50),
-    createTempMovementDict('shrug', ['traps'], 'isolation', 15),
-    createTempMovementDict('reverse fly', ['rear delts'], 'isolation', 20),
-    createTempMovementDict('ab wheel', ['abs'], 'isolation', 20),
-    createTempMovementDict('stiff leg deadlift', ['hamstrings', 'lower back', 'glutes'], 'compound', 50),
-    createTempMovementDict('skullcrusher', ['triceps'], 'isolation', 25),
-    createTempMovementDict('overhead press', ['triceps', 'front delts', 'side delts'], 'compound', 40),
-    createTempMovementDict('leg press', ['quads'], 'isolation', 30),
-    createTempMovementDict('lat row', ['lats', 'biceps', 'rear delts'], 'compound', 25),
+    createTempMovementDict('bench press', ['Front Delts', 'Pecs', 'Triceps'], 'compound', 25),
+    createTempMovementDict('shrug', ['traps'], 'isolation', 10),
+    createTempMovementDict('reverse fly', ['rear delts'], 'isolation', 10),
+    createTempMovementDict('ab wheel', ['abs'], 'isolation', 10),
+    createTempMovementDict('stiff leg deadlift', ['hamstrings', 'lower back', 'glutes'], 'compound', 30),
+    createTempMovementDict('skullcrusher', ['triceps'], 'isolation', 15),
+    createTempMovementDict('overhead press', ['triceps', 'front delts', 'side delts'], 'compound', 25),
+    createTempMovementDict('leg press', ['quads'], 'isolation', 20),
+    createTempMovementDict('lat row', ['lats'], 'compound', 20),
     createTempMovementDict('reverse hyper', ['lower back', 'hamstrings'], 'isolation', 10),
-    createTempMovementDict('bicep curl', ['biceps'], 'isolation', 25),
-    createTempMovementDict('squat', ['quads', 'lower back'], 'compound', 65),
-    createTempMovementDict('glute ham raise', ['glutes', 'hamstrings'], 'isolation', 15),
-    createTempMovementDict('chest fly', ['pecs', 'front delts'], 'isolation', 25),
-    createTempMovementDict('lateral raise', ['side delts'], 'isolation', 20),
-    createTempMovementDict('lat pulldown', ['lats', 'biceps'], 'compound', 40)
+    createTempMovementDict('bicep curl', ['biceps'], 'isolation', 15),
+    createTempMovementDict('squat', ['quads', 'lower back'], 'compound', 30),
+    createTempMovementDict('glute ham raise', ['glutes', 'hamstrings'], 'isolation', 10),
+    createTempMovementDict('chest fly', ['pecs', 'front delts'], 'isolation', 20),
+    createTempMovementDict('lateral raise', ['side delts'], 'isolation', 10),
+    createTempMovementDict('lat pulldown', ['lats', 'biceps'], 'compound', 20)
             ]
 
 movementsDict = {createMovementFromDict(tempMovementDict).name : createMovementFromDict(tempMovementDict) for tempMovementDict in movements}

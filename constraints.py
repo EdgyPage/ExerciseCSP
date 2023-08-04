@@ -46,8 +46,8 @@ class Constraint:
     
     @compoundLimit.setter
     def compoundLimit(self, limit: int):
-        if not isinstance(limit, int) or limit < 1:
-            raise ValueError(f'Expected integer for compoundLimit greater than 0 greater than 0, got {type(limit)}: {limit}')
+        if not isinstance(limit, int) or limit < 0:
+            raise ValueError(f'Expected integer for compoundLimit greater than 0, got {type(limit)}: {limit}')
         self._compoundLimit = limit
 
     @property
@@ -56,7 +56,7 @@ class Constraint:
     
     @isolationLimit.setter
     def isolationLimit(self, limit: int):
-        if not isinstance(limit, int) or limit < 1:
+        if not isinstance(limit, int) or limit < 0:
             raise ValueError(f'Expected integer for isolationLimit greater than 0, got {type(limit)}: {limit}')
         self._isolationLimit = limit
 
@@ -66,7 +66,7 @@ class Constraint:
     
     @totalLimit.setter
     def totalLimit(self, limit: int):
-        if not isinstance(limit, int) or limit < 1:
+        if not isinstance(limit, int) or limit < 0:
             raise ValueError(f'Expected integer for totalLimit greater than 0, got {type(limit)}: {limit}')
         self._totalLimit = limit
 
@@ -126,7 +126,7 @@ class Constraint:
     
     @fatigueLimit.setter
     def fatigueLimit(self, limit: int):
-        if not isinstance(limit, int) or limit < 1:
+        if not isinstance(limit, int) or limit < 0:
             raise ValueError(f'Expected int for fatigueLimit greater than 0, got {type(limit)}: {limit}')
         self._fatigueLimit = limit
 
