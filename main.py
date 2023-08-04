@@ -40,14 +40,19 @@ csp.setAttributes(expandedList = [(m['bench press'], 1),
                                   (m['reverse hyper'], 1),
                                   (m['glute ham raise'], 1),
                                   (m['ab wheel'], 2),
-                                  (m['shrug'], 1),
+                                  (m['shrug'], 1)
                                   ],
                     cycleLength = 5,
-                    compoundLimit = 2,
+                    compoundLimit = 3,
                     isolationLimit = 3,
                     totalLimit = 4,
                     totalMin = 2,
-                    compoundGap = 1
+                    compoundGap = 1,
+                    isolationGap = 1,
+                    compoundMin = 2,
+                    isolationMin = 1,
+                    fatigueLimit = 100,
+                    fatigueMin = 70
 )
 count = 0
 answers = []

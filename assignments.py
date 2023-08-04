@@ -11,10 +11,17 @@ class Assignment:
         self._totalLimit = csp.totalLimit #how many movements per day maximum
         self._totalMin = csp.totalMin #how many movements per day minimum
         self._compoundGap = csp.compoundGap #how many days of gap between similar compound movements
+        self._isolationGap = csp.isolationGap
+        self._compoundMin = csp.compoundMin
+        self._isolationMin = csp.isolationMin
+        self._fatigueMin = csp.fatigueMin
+        self._fatigueLimit = csp.fatigueLimit
 
         self._progressList = [] #built up list of assigned movements, used for comparisons
         self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments
         self._maxPossibleDays = len(self.expandedList) // self.totalMin #highest amount of days a program can have
+        self._maxPossibleCompoundDays = len([movement for movement in self.expandedList if movement.style == 'compound']) // self.compoundMin
+        self._maxPossibleIsolationDays = len([movement for movement in self.expandedList if movement.style == 'isolation']) // self.isolationMin
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
     
@@ -53,7 +60,7 @@ class Assignment:
         allAttributes = vars(self)
         #below line was part of previous implementation where class had no class attributes
         #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
-        return allAttributes    
+        return allAttributes 
 
     @property
     def expandedList(self):
@@ -114,7 +121,35 @@ class Assignment:
     @property
     def maxPossibleDays(self):
         return self._maxPossibleDays
+
+    @property
+    def isolationGap(self):
+        return self._isolationGap
     
+    @property
+    def compoundMin(self):
+        return self._compoundMin
+    
+    @property
+    def isolationMin(self):
+        return self._isolationMin
+    
+    @property
+    def fatigueLimit(self):
+        return self._fatigueLimit
+
+    @property
+    def fatigueMin(self):
+        return self._fatigueMin
+    
+    @property
+    def maxPossibleCompoundDays(self):
+        return self._maxPossibleCompoundDays
+    
+    @property
+    def maxPossibleIsolationDays(self):
+        return self._maxPossibleIsolationDays
+
     def progressScheduleSplitter(self):
         compoundDict = {}
         isolationDict = {}
@@ -151,6 +186,7 @@ class Assignment:
         for day, movements in compoundDict.items():
             if len(movements) > self.compoundLimit:
                 flag = False
+                return flag
         for day, movements in isolationDict.items():
             if len(movements) > self.isolationLimit:
                 flag = False
@@ -174,16 +210,43 @@ class Assignment:
             else:
                 unassignedDays += 1
         return assignedDays, unassignedDays
-
-    def meetMinLimitPartial(self):
+    
+    def assignedCompoundIsolationDays(self):
+        compoundDict, isolationDict = self.progressScheduleSplitter()
+        compoundMovementPerDayDict = {}
+        isolationMovementPerDayDict = {}
+        for key, movements in compoundDict.items():
+            compoundMovementPerDayDict[key] = 0
+            if movements:
+                compoundMovementPerDayDict[key] = compoundMovementPerDayDict[key] + len(movements)
+        for key, movements in isolationDict.items():
+            isolationMovementPerDayDict[key] = 0
+            if movements:
+                isolationMovementPerDayDict[key] = isolationMovementPerDayDict[key] + len(movements)
+        return compoundMovementPerDayDict, isolationMovementPerDayDict
+    
+    def meetTotalCompoundIsolationMinPartial(self):
         flag = True
         assignedDays, unassignedDays = self.assignedDays()
         maxPossibleDays = self.maxPossibleDays
         if assignedDays > maxPossibleDays:
             flag = False
+            return flag
+        
+        compoundMovementPerDayDict, isolationMovementPerDayDict = self.assignedCompoundIsolationDays()
+        for key, count in compoundMovementPerDayDict.items():
+            if count > self.maxPossibleCompoundDays:
+                flag = False
+                return flag
+        
+        for key, count in isolationMovementPerDayDict.items():
+            if count > self.maxPossibleIsolationDays:
+                flag = False
+                return flag
+
         return flag
 
-    def meetMinLimitComplete(self):
+    def meetTotalMinComplete(self):
         flag = True
         for key in self.progressSchedule:
             if self.progressSchedule[key]:
@@ -191,6 +254,61 @@ class Assignment:
                     flag = False
                     break
         return flag
+    
+    def meetFatigueLimitPartial(self):
+        flag = True
+        for key, movements in self.progressSchedule.items():
+            if movements:
+                exhaust = 0
+                for movement in movements:
+                    exhaust += movement.fatigue
+                if exhaust > self.fatigueLimit:
+                    flag = False
+                    return flag
+        return flag
+    
+    #thanks, chatGPT-chan
+    def is_combination_above_threshold(self, numbers, threshold):
+        def check_combination(index, current_sum):
+            if current_sum > threshold:
+                return True
+            if index >= len(numbers):
+                return False
+
+            # Include the current number in the sum
+            if check_combination(index + 1, current_sum + numbers[index]):
+                return True
+
+            # Exclude the current number from the sum
+            if check_combination(index + 1, current_sum):
+                return True
+
+            return False
+
+        return check_combination(0, 0)    
+    
+    def meetFatigueMinPartial(self, unassignedMovements):
+        fatigueList = [movement.fatigue for movement in unassignedMovements]
+        flag = True
+        for key, movements in self.progressSchedule.items():
+            threshold = self.fatigueMin - sum([movement.fatigue for movement in movements]) 
+            flag = self.is_combination_above_threshold(fatigueList, threshold)
+            if not flag:
+                return flag
+        return flag
+
+    def meetFatigueLimitMinComplete(self):
+        flag = True
+        for key, movements in self.progressSchedule.items():
+            if movements:
+                exhaust = 0
+                for movement in movements:
+                    exhaust += movement.fatigue
+                if exhaust > self.fatigueLimit or exhaust < self.fatigueMin:
+                    flag = False
+                    return flag
+        return flag
+
     
     def meetNoCompoundIsolationDailyOverlap(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
@@ -213,8 +331,8 @@ class Assignment:
                 break
         return flag
     
-    def meetCompoundGap(self):
-        compoundDict, *_ = self.progressScheduleSplitter()
+    def meetCompoundIsolationGap(self):
+        compoundDict, isolationDict = self.progressScheduleSplitter()
         tempDict = {}
         flag = True
 
@@ -232,21 +350,41 @@ class Assignment:
                 if prevDay is not None:
                     if currentDay - prevDay <= self.compoundGap:
                         flag = False
-                        break
+                        return flag
                 prevDay = currentDay
+
+        tempDict = {}
+        for day, movements in isolationDict.items():
+            if movements:
+                for movement in movements:  
+                    if movement.name in tempDict:
+                        tempDict[movement.name].append(day)
+                    else:
+                        tempDict[movement.name] = [day]
+        
+        for name, days in tempDict.items():
+            prevDay = None
+            for currentDay in days:
+                if prevDay is not None:
+                    if currentDay - prevDay <= self.isolationGap:
+                        flag = False
+                        return flag
+                prevDay = currentDay
+        
+        #need mix of compound,isolation?... nah
+        
         return flag
     
-    def partialTestSuite(self):
-        flag = self.meetCompoundGap() and self.meetCompoundIsolationLimit() \
+    def partialTestSuite(self, unassignedMovements):
+        flag = self.meetCompoundIsolationGap() and self.meetCompoundIsolationLimit() \
                 and self.meetNoCompoundIsolationDailyOverlap() and self.meetTotalLimit() \
-                and self.meetMinLimitPartial()
+                and self.meetTotalCompoundIsolationMinPartial() and self.meetFatigueLimitPartial() \
+                and self.meetFatigueMinPartial(unassignedMovements) and self.meetCompoundIsolationGap()
         return flag
 
-    def completeTestSuite(self):
-        flag = self.meetCompoundGap() and self.meetCompoundIsolationLimit() \
-                and self.meetNoCompoundIsolationDailyOverlap() and self.meetTotalLimit() \
-                and self.meetMinLimitComplete() and self.meetMovements() \
-                and self.meetMinLimitPartial()
+    def completeTestSuite(self, unassignedMovements):
+        flag = self.partialTestSuite(unassignedMovements) and self.meetMovements() \
+                and self.meetTotalMinComplete() and self.meetFatigueLimitMinComplete()
         return flag
 
     def findAssignment(self, movements : list, answers :list, count: int):
@@ -258,11 +396,11 @@ class Assignment:
                     updateMovements = movements[1:]
                     updateAssignment.progressSchedule = (key, movement, True)
                     updateAssignment.progressList = (movement, True)
-                    if updateAssignment.partialTestSuite():
+                    if updateAssignment.partialTestSuite(updateMovements):
                         updateAssignment.findAssignment(updateMovements, answers, count)
         else:
             count += 1
-            if self.completeTestSuite():
+            if self.completeTestSuite([]):
                 answers.append(self)
                 removeDuplicates(answers)
 

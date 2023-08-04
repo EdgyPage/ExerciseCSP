@@ -1,9 +1,5 @@
 from movements import Movement
 class Constraint:
-
-    _expandedList: list
-
-
     def __init__(self):
         self._expandedList = None #full list, including repeats, of all movements in cycle
         self._cycleLength = None #how many sessions for each training cycle excluding rest days eg ppl is 6 days
@@ -11,13 +7,12 @@ class Constraint:
         self._isolationLimit = None #how many isolation movements per session
         self._totalLimit = None #how many movements per day maximum
         self._totalMin = None #how many movements per day minimum
-        self._compoundGap = None #how many days of gap between similar compound movements
-
-        #below attributes may be implemented in the future as current implentation would require fiddling with compoundGap logic
-        #shift+alt+a to unblock code block
-        """self._isoComDailyOverlap = None #how many isolation movements can overlap with compound movements per session eg bench press and skullscrushers
-        self._isoIsoDailyOverlap = None #how many isolation movements can overlap with isolation movements per session eg skullcrushers and tricep pushdowns
-        self._comComDailyOverlap = None #how many compound movements can overlap with compound movements per session eg sdls and deadlifts"""
+        self._compoundGap = None #how many days of gap between similar compound movements   
+        self._isolationGap = None
+        self._compoundMin = None
+        self._isolationMin = None
+        self._fatigueMin = None
+        self._fatigueLimit = None
 
     @property
     def expandedList(self):
@@ -81,7 +76,7 @@ class Constraint:
     
     @totalMin.setter
     def totalMin(self, limit: int):
-        if not isinstance(limit, int) or limit > self.totalLimit:
+        if not isinstance(limit, int) or limit > self.totalLimit or limit < 0:
             raise ValueError(f'Expected integer for totalMin less than totalLimit, got {type(limit)}: {limit}')
         self._totalMin = limit
     
@@ -91,9 +86,60 @@ class Constraint:
     
     @compoundGap.setter
     def compoundGap(self, limit: int):
-        if not isinstance(limit, int) or limit < 1:
+        if not isinstance(limit, int) or limit < 0:
             raise ValueError(f'Expected integer for compoundGap greater than 0, got {type(limit)}: {limit}')
         self._compoundGap = limit
+
+    @property
+    def isolationGap(self):
+        return self._isolationGap
+    
+    @isolationGap.setter
+    def isolationGap(self, limit: int):
+        if not isinstance(limit, int) or limit < 0:
+            raise ValueError(f'Expected integer for isolationGap greater than 0, got {type(limit)}: {limit}')
+        self._isolationGap = limit
+
+    @property
+    def compoundMin(self):
+        return self._compoundMin
+    
+    @compoundMin.setter
+    def compoundMin(self, limit: int):
+        if not isinstance(limit, int) or limit > self.compoundLimit or limit < 0 :
+            raise ValueError(f'Expected integer for compoundMin less than compoundLimit, got {type(limit)}: {limit}')
+        self._compoundMin = limit
+
+    @property
+    def isolationMin(self):
+        return self._isolationMin
+    
+    @isolationMin.setter
+    def isolationMin(self, limit: int):
+        if not isinstance(limit, int) or limit > self.isolationLimit or limit < 0 :
+            raise ValueError(f'Expected integer for isolationMin less than isolationLimit, got {type(limit)}: {limit}')
+        self._isolationMin = limit
+    
+    @property
+    def fatigueLimit(self):
+        return self._fatigueLimit
+    
+    @fatigueLimit.setter
+    def fatigueLimit(self, limit: int):
+        if not isinstance(limit, int) or limit < 1:
+            raise ValueError(f'Expected int for fatigueLimit greater than 0, got {type(limit)}: {limit}')
+        self._fatigueLimit = limit
+
+    @property
+    def fatigueMin(self):
+        return self._fatigueMin
+    
+    @fatigueMin.setter
+    def fatigueMin(self, limit: int):
+        if not isinstance(limit, int) or limit > self.fatigueLimit or limit < 0 :
+            raise ValueError(f'Expected int for fatigueMin less than fatigueLimit, got {type(limit)}: {limit}')
+        self._fatigueMin = limit
+
 
     #sets attributes on attribute ->  value pair where attribute is the respective setter function and value is the value
     def setAttributes(self, **kwargs):
