@@ -186,9 +186,10 @@ class Assignment:
     def meetMinLimitComplete(self):
         flag = True
         for key in self.progressSchedule:
-            if len(self.progressSchedule[key]) < self.totalMin:
-                flag = False
-                break
+            if self.progressSchedule[key]:
+                if len(self.progressSchedule[key]) < self.totalMin:
+                    flag = False
+                    break
         return flag
     
     def meetNoCompoundIsolationDailyOverlap(self):
@@ -248,17 +249,19 @@ class Assignment:
                 and self.meetMinLimitPartial()
         return flag
 
-    def findAssignment(self, movements : list, answers :list):
+    def findAssignment(self, movements : list, answers :list, count: int):
         if movements:
             for movement in movements:
+                count += 1
                 for key in self.progressSchedule:
                     updateAssignment = copy.deepcopy(self)
                     updateMovements = movements[1:]
                     updateAssignment.progressSchedule = (key, movement, True)
                     updateAssignment.progressList = (movement, True)
                     if updateAssignment.partialTestSuite():
-                        updateAssignment.findAssignment(updateMovements, answers)
+                        updateAssignment.findAssignment(updateMovements, answers, count)
         else:
+            count += 1
             if self.completeTestSuite():
                 answers.append(self)
                 removeDuplicates(answers)

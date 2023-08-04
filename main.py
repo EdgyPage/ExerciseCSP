@@ -25,22 +25,37 @@ from assignments import *
 import copy
 
 csp = Constraint()
-csp.setAttributes(expandedList = [(m['ab wheel'], 2), 
-                                  (m['bench press'], 1), 
-                                  (m['reverse fly'], 1)
+csp.setAttributes(expandedList = [(m['bench press'], 1), 
+                                  (m['overhead press'], 1),
+                                  (m['lat row'], 1),
+                                  (m['lat pulldown'], 1),
+                                  (m['squat'], 1),
+                                  (m['stiff leg deadlift'], 1),
+                                  (m['reverse fly'], 2),
+                                  (m['chest fly'], 1),
+                                  (m['skullcrusher'], 1),
+                                  (m['bicep curl'], 1),
+                                  (m['leg press'], 1),
+                                  (m['lateral raise'], 1),
+                                  (m['reverse hyper'], 1),
+                                  (m['glute ham raise'], 1),
+                                  (m['ab wheel'], 2),
+                                  (m['shrug'], 1),
                                   ],
-                    cycleLength = 2,
-                    compoundLimit = 3,
-                    isolationLimit = 4,
-                    totalLimit = 2,
+                    cycleLength = 5,
+                    compoundLimit = 2,
+                    isolationLimit = 3,
+                    totalLimit = 4,
                     totalMin = 2,
                     compoundGap = 1
 )
-
+count = 0
 answers = []
 assign = Assignment(csp)
-
-assign.findAssignment(assign.expandedList, answers)
-
-for answer in answers:
-    print(answer)
+if assign.meetSpace():
+    assign.findAssignment(assign.expandedList, answers, count)
+    for answer in answers:
+        print(answer)
+    print(count)
+else:
+    print('No available configurations!')

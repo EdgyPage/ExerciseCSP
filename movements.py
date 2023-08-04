@@ -105,7 +105,7 @@ movements = [
     createTempMovementDict('shrug', ['traps'], 'isolation'),
     createTempMovementDict('reverse fly', ['rear delts'], 'isolation'),
     createTempMovementDict('ab wheel', ['abs'], 'isolation'),
-    createTempMovementDict('stiff leg dealift', ['hamstrings', 'lower back', 'glutes'], 'compound'),
+    createTempMovementDict('stiff leg deadlift', ['hamstrings', 'lower back', 'glutes'], 'compound'),
     createTempMovementDict('skullcrusher', ['triceps'], 'isolation'),
     createTempMovementDict('overhead press', ['triceps', 'front delts', 'side delts'], 'compound'),
     createTempMovementDict('leg press', ['quads'], 'isolation'),
@@ -115,7 +115,8 @@ movements = [
     createTempMovementDict('squat', ['quads', 'lower back'], 'compound'),
     createTempMovementDict('glute ham raise', ['glutes', 'hamstrings'], 'isolation'),
     createTempMovementDict('chest fly', ['pecs', 'front delts'], 'isolation'),
-    createTempMovementDict('lateral raise', ['side delts'], 'isolation')
+    createTempMovementDict('lateral raise', ['side delts'], 'isolation'),
+    createTempMovementDict('lat pulldown', ['lats', 'biceps'], 'compound')
             ]
 
 movementsDict = {createMovementFromDict(tempMovementDict).name : createMovementFromDict(tempMovementDict) for tempMovementDict in movements}
