@@ -49,9 +49,9 @@ csp.setAttributes(expandedList = [(m['bench press'], 1),
                     totalMin = 2,
                     compoundGap = 1,
                     isolationGap = 1,
-                    compoundMin = 2,
+                    compoundMin = 1,
                     isolationMin = 0,
-                    fatigueLimit = 75,
+                    fatigueLimit = 100,
                     fatigueMin = 35
 )
 
@@ -78,9 +78,10 @@ csp.setAttributes(expandedList = [(m['bench press'], 3),
 
 count = 0
 answers = []
+additions = []
 assign = Assignment(csp)
 if assign.meetSpace():
-    assign.findAssignment(assign.expandedList, answers)
+    assign.findAssignment(assign.expandedList, answers, additions)
     for answer in answers:
         print(answer)
     print(count)

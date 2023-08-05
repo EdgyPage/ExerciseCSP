@@ -458,21 +458,35 @@ class Assignment:
                 and self.meetTotalMinComplete() \
                     and self.meetFatigueLimitMinComplete()
         return flag
+    
+    def deleteAdditions(self, additions : list):
+        for key, movement in additions:
+            self.progressSchedule
 
-    def findAssignment(self, movements : list, answers :list):
+    def findAssignment(self, movements : list, answers :list, additions: list):
         flag = True
         if movements:
             for movement in movements:
+                updateMovements = movements[1:]
                 for key in self.progressSchedule:
-                    updateAssignment = copy.deepcopy(self)
-                    updateMovements = movements[1:]
-                    updateAssignment.progressSchedule = (key, movement, True)
-                    updateAssignment.progressList = (movement, True)
-                    passConditions = updateAssignment.partialTestSuite(updateMovements)
+                    #updateAssignment = copy.deepcopy(self)
+                    #updateAssignment.progressSchedule = (key, movement, True)
+                    #updateAssignment.progressList = (movement, True)
+                    #passConditions = updateAssignment.partialTestSuite(updateMovements)
+                    self.progressSchedule = (key, movement, True)
+                    self.progressList = (movement, True)
+                    passConditions = self.partialTestSuite(updateMovements)
                     if passConditions:
-                        updateAssignment.findAssignment(updateMovements, answers)
+                        #updateAssignment.findAssignment(updateMovements, answers)
+                        self.findAssignment(updateMovements, answers, additions)
+                        #updateAssignment.progressSchedule = (key, movement, False)
+                        #updateAssignment.progressList = (movement, False)
+                        
+                    self.progressSchedule = (key, movement, False)
+                    self.progressList = (movement, False)
                     if key == list(self.progressSchedule.keys())[-1] and not passConditions:
                         flag = False
+                        
                 if not flag:
                     break
         else:

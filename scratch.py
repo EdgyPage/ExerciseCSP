@@ -1,24 +1,13 @@
-def is_combination_above_threshold(numbers, threshold):
-        def check_combination(index, current_sum):
-            if current_sum >= threshold:
-                return True
-            if index >= len(numbers):
-                return False
+# Step 1: Initialize an empty dictionary
+my_dict = {1: '', 2: '', 3:''}
 
-            # Include the current number in the sum
-            if check_combination(index + 1, current_sum + numbers[index]):
-                return True
+# Step 2: Iterate through the list
+my_list = ['value1', 'value2', 'value3']
+for item in my_list:
+    # Step 3: Assign the element to all keys in the dictionary
+    for key in my_dict.keys():
+        my_dict[key] = item
 
-            # Exclude the current number from the sum
-            if check_combination(index + 1, current_sum):
-                return True
+# Print the resulting dictionary
+print(my_dict)
 
-            return False
-
-        return check_combination(0, 0)
-
-numbers = []
-threshold = 0
-
-result = is_combination_above_threshold(numbers, threshold)
-print(result)
