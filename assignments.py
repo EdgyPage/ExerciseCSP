@@ -274,6 +274,21 @@ class Assignment:
 
         return flag
 
+
+    def meetTotalCompoundIsolationMinComplete(self):
+        flag = True
+        compoundDict, isolationDict = self.progressScheduleSplitter()
+        for day, movements in compoundDict.items():
+                if len(movements) < self.compoundMin:
+                    flag = False
+                    return flag
+        
+        for day, movements in isolationDict.items():
+                if len(movements) < self.isolationMin:
+                    flag = False
+                    return flag
+        return flag
+
     def meetTotalMinComplete(self):
         flag = True
         for key in self.progressSchedule:
@@ -456,43 +471,34 @@ class Assignment:
         flag = self.partialTestSuite(unassignedMovements) \
             and self.meetMovements() \
                 and self.meetTotalMinComplete() \
-                    and self.meetFatigueLimitMinComplete()
+                    and self.meetFatigueLimitMinComplete() \
+                    and self.meetTotalCompoundIsolationMinComplete()
         return flag
     
     def deleteAdditions(self, additions : list):
         for key, movement in additions:
             self.progressSchedule
 
-    def findAssignment(self, movements : list, answers :list, additions: list):
+    def findAssignment(self, movements : list, answers :list):
         flag = True
         if movements:
             for movement in movements:
                 updateMovements = movements[1:]
                 for key in self.progressSchedule:
-                    #updateAssignment = copy.deepcopy(self)
-                    #updateAssignment.progressSchedule = (key, movement, True)
-                    #updateAssignment.progressList = (movement, True)
-                    #passConditions = updateAssignment.partialTestSuite(updateMovements)
                     self.progressSchedule = (key, movement, True)
                     self.progressList = (movement, True)
                     passConditions = self.partialTestSuite(updateMovements)
                     if passConditions:
-                        #updateAssignment.findAssignment(updateMovements, answers)
-                        self.findAssignment(updateMovements, answers, additions)
-                        #updateAssignment.progressSchedule = (key, movement, False)
-                        #updateAssignment.progressList = (movement, False)
-                        
+                        self.findAssignment(updateMovements, answers)
                     self.progressSchedule = (key, movement, False)
                     self.progressList = (movement, False)
                     if key == list(self.progressSchedule.keys())[-1]:
                         flag = False
-
                 if not flag:
                     break
         else:
             if self.completeTestSuite([]):
-                answers.append(self)
-                removeDuplicates(answers)
+                answers.append(copy.deepcopy(self))
 
     
 def removeDuplicates(answers: list):

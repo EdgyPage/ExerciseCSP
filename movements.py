@@ -117,7 +117,7 @@ movements = [
     createTempMovementDict('overhead press', ['triceps', 'front delts', 'side delts'], 'compound', 25),
     createTempMovementDict('leg press', ['quads'], 'compound', 20),
     createTempMovementDict('lat row', ['lats'], 'compound', 20),
-    createTempMovementDict('reverse hyper', ['lower back', 'hamstrings'], 'isolation', 10),
+    createTempMovementDict('reverse hyper', ['hamstrings'], 'isolation', 10),
     createTempMovementDict('bicep curl', ['biceps'], 'isolation', 15),
     createTempMovementDict('squat', ['quads', 'lower back'], 'compound', 30),
     createTempMovementDict('glute ham raise', ['glutes', 'hamstrings'], 'isolation', 10),
