@@ -484,9 +484,9 @@ class Assignment:
                         
                     self.progressSchedule = (key, movement, False)
                     self.progressList = (movement, False)
-                    if key == list(self.progressSchedule.keys())[-1] and not passConditions:
+                    if key == list(self.progressSchedule.keys())[-1]:
                         flag = False
-                        
+
                 if not flag:
                     break
         else:

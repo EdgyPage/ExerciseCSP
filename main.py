@@ -48,11 +48,11 @@ csp.setAttributes(expandedList = [(m['bench press'], 1),
                     totalLimit = 4,
                     totalMin = 2,
                     compoundGap = 1,
-                    isolationGap = 1,
+                    isolationGap = 0,
                     compoundMin = 1,
-                    isolationMin = 0,
+                    isolationMin = 1,
                     fatigueLimit = 100,
-                    fatigueMin = 35
+                    fatigueMin = 45
 )
 
 """csp = Constraint()
