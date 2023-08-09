@@ -21,7 +21,7 @@ csp.setAttributes(expandedList = [
                                   (m['lat pulldown'], 1),
                                   (m['lat row'], 1),
                                   (m['bicep curl'], 1),
-                                  (m['lateral raise'], 1),
+                                  #(m['lateral raise'], 1),
                                   (m['shrug'], 1),
                                   (m['reverse fly'], 2),
                                   (m['ab wheel'], 2)
@@ -37,7 +37,7 @@ csp.setAttributes(expandedList = [
                     isolationMin = 1, #min amoun of isolation movements per session
                     #1 fatigue is roughly 1 minute in my current tuning
                     fatigueLimit = 75, #increase the fatigue maximum to make your programs potentially more exhausting 
-                    fatigueMin = 55 #lower the fatigue minimum to see WAY more options
+                    fatigueMin = 45 #lower the fatigue minimum to see WAY more options
 )
 
 """csp = Constraint()
@@ -63,9 +63,15 @@ assign = Assignment(csp)
 if assign.meetSpace():
     assign.findAssignment(assign.expandedList, answers)
     answers = list(set(answers))
-    print(len(answers))
+    
     for answer in answers:
+        print(answers.index(answer)+1)
         print(answer)
     
+    filtered = [answer for answer in answers if m['bench press'] in answer.progressSchedule[1] and m['squat'] in answer.progressSchedule[5] and m['shrug'] in answer.progressSchedule[1]]
+    print('______________________________')
+    for filt in filtered:
+        print(filtered.index(filt)+1)
+        print(filt)
 else:
     print('No available configurations!')
