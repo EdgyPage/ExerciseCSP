@@ -4,6 +4,7 @@ from movements import *
 from movements import movementsDict as m
 from assignments import *
 
+#create Constraint 
 csp = Constraint()
 csp.setAttributes(expandedList = [
                                   #(movement, num of times per cycle)
@@ -40,24 +41,6 @@ csp.setAttributes(expandedList = [
                     fatigueMin = 45 #lower the fatigue minimum to see WAY more options
 )
 
-"""csp = Constraint()
-csp.setAttributes(expandedList = [(m['bench press'], 3), 
-                                  (m['ab wheel'], 3)
-                                 
-                                  ],
-                    cycleLength = 5,
-                    compoundLimit = 3,
-                    isolationLimit = 3,
-                    totalLimit = 4,
-                    totalMin = 1,
-                    compoundGap = 1,
-                    isolationGap = 1,
-                    compoundMin = 0,
-                    isolationMin = 0,
-                    fatigueLimit = 75,
-                    fatigueMin = 10
-)"""
-
 answers = []
 assign = Assignment(csp)
 if assign.meetSpace():
@@ -68,6 +51,9 @@ if assign.meetSpace():
         print(answers.index(answer)+1)
         print(answer)
     
+    #little code snippet below can be commented out
+    #it's meant to create a sublist of all answers where a Movement is assigned to a particular day
+    #complete implementation for this idea would require a slight edit to Assignments to take in partial Assignments but whatever
     filtered = [answer for answer in answers if m['bench press'] in answer.progressSchedule[1] and m['squat'] in answer.progressSchedule[5] and m['shrug'] in answer.progressSchedule[1]]
     print('______________________________')
     for filt in filtered:
