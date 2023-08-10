@@ -11,17 +11,17 @@ class Assignment:
         self._totalLimit = csp.totalLimit #how many movements per day maximum
         self._totalMin = csp.totalMin #how many movements per day minimum
         self._compoundGap = csp.compoundGap #how many days of gap between similar compound movements
-        self._isolationGap = csp.isolationGap
-        self._compoundMin = csp.compoundMin
-        self._isolationMin = csp.isolationMin
-        self._fatigueMin = csp.fatigueMin
-        self._fatigueLimit = csp.fatigueLimit
+        self._isolationGap = csp.isolationGap #how many days of gap between any isolated part being used again
+        self._compoundMin = csp.compoundMin #how many compound movements per day minimum
+        self._isolationMin = csp.isolationMin #how many isolation movmeents per day minimum
+        self._fatigueMin = csp.fatigueMin #how much fatigue per day minimum
+        self._fatigueLimit = csp.fatigueLimit #how much fatigue per day maximum
 
         self._progressList = [] #built up list of assigned movements, used for comparisons
-        self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments
-        self._maxPossibleDays = self.maxPossibleTotalDaysCalc()
-        self._maxPossibleCompoundDays = self.maxPossibleCompoundDaysCalc()
-        self._maxPossibleIsolationDays = self.maxPossibleIsolationDaysCalc()
+        self._progressSchedule = {} #built up dictionary of assigned movements, used for tests of complete assignments; formated {day (as int): [Movements]}
+        self._maxPossibleDays = self.maxPossibleTotalDaysCalc() #calculates maximum amount of days needed to accomodate all Movements to be assigned
+        self._maxPossibleCompoundDays = self.maxPossibleCompoundDaysCalc() #calculates maximum amount of days needed to accomodate all compound Movements to be assigned
+        self._maxPossibleIsolationDays = self.maxPossibleIsolationDaysCalc() #calculates maximum amount of days needed to accomodate all isolation Movements to be assigned
         for i in range(0, self._cycleLength):
             self._progressSchedule[i+1] = []
 
@@ -39,6 +39,7 @@ class Assignment:
             output += '\n'
         return output
     
+    #equality defined as dict of variables equalling other dict with matching object classes
     def __eq__(self, other):
         flag = True
         if not isinstance(other, Assignment):
@@ -49,6 +50,7 @@ class Assignment:
         flag = selfAttributes == otherAttributes
         return flag
     
+    #hashable object is tuple of (day1, m1, m2, m3, day2, etc.)
     def __hash__(self):
         hashable = tuple()
         for key, movements in self.progressSchedule.items():
@@ -59,8 +61,6 @@ class Assignment:
         
     def getAttributes(self):
         allAttributes = vars(self)
-        #below line was part of previous implementation where class had no class attributes
-        #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
         return allAttributes 
 
     @property
@@ -71,6 +71,8 @@ class Assignment:
     def progressList(self):
         return self._progressList
     
+    #helper method used to assign list of Movements that is built up as Movements are assigned, bool parameter is important
+    #tuple is unpacked 
     @progressList.setter
     def progressList(self, value : (Movement, bool)):
         movement, condition = value
@@ -83,6 +85,8 @@ class Assignment:
     def progressSchedule(self):
         return self._progressSchedule
     
+    #helper method used to assign Movements to certain days
+    #tuple is unpacked
     @progressSchedule.setter
     def progressSchedule(self, value: (int, Movement, bool)):
         day, movement, condition = value
@@ -147,6 +151,7 @@ class Assignment:
         if self.totalMin == 0:
             days = 0
         else:
+            #if there are 12 movements to be assigned but there is a per session minimum of 5, then max number of days is 2
             days = len(self.expandedList) // self.totalMin #highest amount of days a program can have
         return days
     
@@ -172,6 +177,7 @@ class Assignment:
             days = len([movement for movement in self.expandedList if movement.style == 'isolation']) // self.isolationMin
         return days
 
+    #helper function that splits self.progressSchedule in to two similar dicts where keys are the same but Movement assignment is based on style
     def progressScheduleSplitter(self):
         compoundDict = {}
         isolationDict = {}
@@ -186,7 +192,8 @@ class Assignment:
                 elif movement.style == 'isolation':
                     isolationDict[day].append(movement)
         return compoundDict, isolationDict
-
+    
+    #tests if current assignment of Movements matches complete assignment of Movements
     def meetMovements(self):
         flag = True
         if len(self.progressList) != len(self.expandedList):
@@ -198,10 +205,12 @@ class Assignment:
                 break
         return flag
 
+    #sanity check to see all Movements can fit in to alotted amount of days
     def meetSpace(self):
         max = self.cycleLength * self.totalLimit
         return max >= len(self.expandedList)
     
+    #tests if Assignment meets compound and isolation limits
     def meetCompoundIsolationLimit(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
         flag = True
@@ -215,6 +224,7 @@ class Assignment:
                 break
         return flag
 
+    #tests if Assignment meets total limit
     def meetTotalLimit(self):
         flag = True
         for key in self.progressSchedule:
@@ -223,6 +233,7 @@ class Assignment:
                 break
         return flag
     
+    #helper function that returns amount of assigned and unassigned days in self.progressSchedule
     def assignedDays(self):
         assignedDays = 0
         unassignedDays = 0
@@ -233,6 +244,7 @@ class Assignment:
                 unassignedDays += 1
         return assignedDays, unassignedDays
     
+    #helper function that returns dicts where {day : number of compound/isolation movmements on that day}
     def assignedCompoundIsolationDays(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
         compoundMovementPerDayDict = {}
@@ -247,6 +259,7 @@ class Assignment:
                 isolationMovementPerDayDict[key] = isolationMovementPerDayDict[key] + len(movements)
         return compoundMovementPerDayDict, isolationMovementPerDayDict
     
+    #tests if PARTIAL Assignment CAN meet total, isolation, and compound mins by clever comparison with floored ints
     def meetTotalCompoundIsolationMinPartial(self):
         flag = True
         assignedDays, unassignedDays = self.assignedDays()
@@ -274,7 +287,7 @@ class Assignment:
 
         return flag
 
-
+    #tests if COMPLETE Assignment meets all minimums
     def meetTotalCompoundIsolationMinComplete(self):
         flag = True
         compoundDict, isolationDict = self.progressScheduleSplitter()
@@ -287,17 +300,15 @@ class Assignment:
                 if len(movements) < self.isolationMin:
                     flag = False
                     return flag
-        return flag
-
-    def meetTotalMinComplete(self):
-        flag = True
+                
         for key in self.progressSchedule:
             if self.progressSchedule[key]:
                 if len(self.progressSchedule[key]) < self.totalMin:
                     flag = False
-                    break
+                    return flag
         return flag
-    
+
+    #tests if partial Assignment exceeds fatigue limit    
     def meetFatigueLimitPartial(self):
         flag = True
         for key, movements in self.progressSchedule.items():
@@ -311,6 +322,8 @@ class Assignment:
         return flag
     
     #thanks, chatGPT-chan
+    #function that mostly works
+    #helper function that checks to see if list of numbers can meet or exceed a threshold amount
     def is_combination_above_threshold(self, numbers, threshold):
         def check_combination(index, current_sum):
             if current_sum >= threshold:
@@ -330,6 +343,7 @@ class Assignment:
 
         return check_combination(0, 0)    
     
+    #test that checks if partial Assignment has enough Movements left to meet fatigue minimum for each assigned day
     def meetFatigueMinPartial(self, unassignedMovements):
         fatigueList = [movement.fatigue for movement in unassignedMovements]
         flag = True
@@ -341,6 +355,7 @@ class Assignment:
                     return flag
         return flag
 
+    #tests complete assignments to see if all days fit within fatigue min and max
     def meetFatigueLimitMinComplete(self):
         flag = True
         for key, movements in self.progressSchedule.items():
@@ -353,7 +368,9 @@ class Assignment:
                     return flag
         return flag
 
-    
+    #tests Assignment to see if there is no overlap between any Movement parts eg bench press on same day as tricep pushdowns
+    #this function is assumed to be what the user wants so it is hard coded to work, can easily make a case to take in a bool upon Constraint instatiation
+    #to allow overlaps between compound and isolation movements
     def meetNoCompoundIsolationDailyOverlap(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
         tempDict = {}
@@ -374,11 +391,8 @@ class Assignment:
                 flag = False
                 break
         return flag
-    
-    def gapChecker(self, dictToCheck):
-        pass
 
-    
+    #tests to see if parts of all assigned movements meet respective gaps
     def meetCompoundIsolationGap(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
         tempDict = {}
@@ -421,6 +435,7 @@ class Assignment:
         
         return flag
     
+    #tests to see if parts of all assigned movements meet respective gaps when accounting for overlap between compound and isolation parts
     def meetCompoundIsolationGapOverlap(self):
         compoundDict, isolationDict = self.progressScheduleSplitter()
         tempDict = {}
@@ -455,6 +470,7 @@ class Assignment:
         
         return flag
     
+    #All partial tests in one helper function
     def partialTestSuite(self, unassignedMovements):
         flag = self.meetCompoundIsolationGap() and \
             self.meetCompoundIsolationLimit() \
@@ -467,44 +483,37 @@ class Assignment:
                 and self.meetCompoundIsolationGapOverlap()
         return flag
 
+    #all complete tests and partial tests in one helper function
     def completeTestSuite(self, unassignedMovements):
         flag = self.partialTestSuite(unassignedMovements) \
             and self.meetMovements() \
-                and self.meetTotalMinComplete() \
                     and self.meetFatigueLimitMinComplete() \
                     and self.meetTotalCompoundIsolationMinComplete()
         return flag
-    
-    def deleteAdditions(self, additions : list):
-        for key, movement in additions:
-            self.progressSchedule
 
+    #main function
     def findAssignment(self, movements : list, answers :list):
         flag = True
-        if movements:
-            for movement in movements:
-                updateMovements = movements[1:]
-                for key in self.progressSchedule:
-                    self.progressSchedule = (key, movement, True)
-                    self.progressList = (movement, True)
-                    passConditions = self.partialTestSuite(updateMovements)
-                    if passConditions:
-                        self.findAssignment(updateMovements, answers)
-                    self.progressSchedule = (key, movement, False)
-                    self.progressList = (movement, False)
-                    if key == list(self.progressSchedule.keys())[-1]:
+        if movements: #if list has Movements
+            for movement in movements: #for each Movement
+                updateMovements = movements[1:] #new list is input list's tail
+                for key in self.progressSchedule: #for each possible day
+                    self.progressSchedule = (key, movement, True) #assign Movement to day
+                    self.progressList = (movement, True) #assign Movement to list of assigned movements
+                    passConditions = self.partialTestSuite(updateMovements) #check partial assignment
+                    if passConditions: 
+                        self.findAssignment(updateMovements, answers) #recurse if Assignment is 'good enough' with tail of Movements left to be assigned
+                    self.progressSchedule = (key, movement, False) #removes Movement assignment after recursion fails or if conditions don't pass
+                    self.progressList = (movement, False) 
+                    if key == list(self.progressSchedule.keys())[-1]: #if key is last in list of all possible keys, then Movement has no where else to go ie failure
                         flag = False
-                if not flag:
+                if not flag: #breaks out of loop so that next Movement is not assigned if previous Movement has not been assigned 
                     break
         else:
-            if self.completeTestSuite([]):
-                answers.append(copy.deepcopy(self))
+            if self.completeTestSuite([]): #if Assignment has no more Movements left to assign AND meets complete constraints
+                answers.append(copy.deepcopy(self)) #make a copy of Assignment and append to list of valid answers
 
-    
-def removeDuplicates(answers: list):
-    unique = set(answers)
-    answers.clear()
-    answers.extend(unique)
+
 
 
 
