@@ -8,11 +8,11 @@ class Constraint:
         self._totalLimit = None #how many movements per day maximum
         self._totalMin = None #how many movements per day minimum
         self._compoundGap = None #how many days of gap between similar compound movements   
-        self._isolationGap = None
-        self._compoundMin = None
-        self._isolationMin = None
-        self._fatigueMin = None
-        self._fatigueLimit = None
+        self._isolationGap = None #how many days of gap between any isolated part being used again
+        self._compoundMin = None #how many compound movements per day minimum
+        self._isolationMin = None #how many isolation movmeents per day minimum
+        self._fatigueMin = None #how much fatigue per day minimum
+        self._fatigueLimit = None #how much fatigue per day maximum
 
     @property
     def expandedList(self):
@@ -148,8 +148,6 @@ class Constraint:
 
     def getAttributes(self):
         allAttributes = vars(self)
-        #below line was part of previous implementation where class had no class attributes
-        #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
         return allAttributes
 
 
