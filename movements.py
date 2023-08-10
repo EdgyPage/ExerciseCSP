@@ -1,23 +1,21 @@
 class Movement:
     #valid names creates list of valid values for all Movements
-    """validNames = list(map(str.lower, 
-                            ['Bench Press', 'Shrug', 'Reverse Fly', 'Ab Wheel',
-                            'Stiff Leg Deadlift', 'Skullcrusher', 'Overhead Press',
-                            'Leg Press', 'Lat Row', 'Reverse Hyper', 'Bicep Curl', 
-                            'Squat', 'Lat Pulldown', 'Lat Raise', 'Glute Ham Raise']))"""
     validParts = list(map(str.lower, 
                           ['traps', 'front delts', 'side delts', 'rear delts', 
                            'biceps', 'triceps', 'pecs', 'abs', 'lats', 'quads',
                            'hamstrings', 'glutes', 'lower back']))
-    validStyles = list(map(str.lower, ['compound', 'isolation']))
+    #movements can only be compound or isolation, logical extensions include machine or free-weight but Assignments and Constraints 
+    # will need to be reworked for general cases
+    validStyles = list(map(str.lower, ['compound', 'isolation'])) 
+
 
     def __init__(self):
         
         #all attributes are none until they go through the @property decorator setters else
-        self._name = None
-        self._style = None
-        self._parts = None
-        self._fatigue = None
+        self._name = None #name of Movement, is arbitrary
+        self._style = None #style of movement
+        self._parts = None #body parts used
+        self._fatigue = None #how hard each movement is. Arbitrary units. My units roughly equate to minutes
     
     def __repr__(self):
         return f'{self.name}'
@@ -29,10 +27,12 @@ class Movement:
             return flag
         selfAttributes = self.getAttributes()
         otherAttributes = other.getAttributes()
+        #two Movements are equal if dict of vars are equal
         flag = selfAttributes == otherAttributes
         return flag
     
     def __hash__(self):
+        #Movement hashable object is tuple of attributes since attributes dict is not hashable for some excellent reason
         hashable = tuple()
         hashable = hashable + (self.name, self.style, self.fatigue)
         for part in self.part:
@@ -58,8 +58,6 @@ class Movement:
     #validates name and enforces lowercase convention for attributes
     def name(self, value):
         value = value.lower()
-        """if value not in self.validNames:
-            raise ValueError(f"Invalid value. Valid values are: {', '.join(self.validNames)}")"""
         self._name = value
 
     @property
@@ -98,15 +96,17 @@ class Movement:
         #attributesOfInterest = {attr: value for attr, value in allAttributes.items() if attr.startswith('_')}
         return allAttributes
 
-#can use this later to maybe create list of 
+#helper function to create Movements from function parameter
 def createMovementFromDict(movementDict : dict):
     movement = Movement()
     movement.setAttributes(name = movementDict["name"], part = movementDict["part"], style = movementDict["style"], fatigue = movementDict['fatigue'])
     return movement
 
+#helper function to create dictionaries from function parameters
 def createTempMovementDict(name: str, part: list, style: str, exhaust: int):
     return {'name': name, 'part': part, 'style': style, 'fatigue': exhaust}
 
+#list of general movements, add new dictionaries with helper function to create list of Movements to be created
 movements = [
     createTempMovementDict('bench press', ['Front Delts', 'Pecs', 'Triceps'], 'compound', 25),
     createTempMovementDict('shrug', ['traps'], 'isolation', 10),
@@ -126,5 +126,6 @@ movements = [
     createTempMovementDict('lat pulldown', ['lats', 'biceps'], 'compound', 20)
             ]
 
+#movementsDict can be referenced on import to access Movement by name
 movementsDict = {createMovementFromDict(tempMovementDict).name : createMovementFromDict(tempMovementDict) for tempMovementDict in movements}
 
